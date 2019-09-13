@@ -1,16 +1,22 @@
 const algorithmia = require('algorithmia')
 const algorithmiaApiKey = require('../credentials/algorithmia.json').apiKey
 const sentenceBoundaryDetection = require('sbd')
-const watsonApiKey = require('../credentials/watson-nlu.json').apikey
 
+const watsonApiKey = require('../credentials/watson-nlu.json').apikey
 const NaturalLanguageUnderstandingV1 = require('watson-developer-cloud/natural-language-understanding/v1.js');
 
-async function robot(content){
+const state = require('../robots/state')
+
+async function robot(){
+    const content = state.load()
+
     await fetchContentFromWikipedia(content)
     sanitizeContent(content)
     breakContentIntoSentences(content)
     limitMaximumSentences(content)
     await fetchKeywordsOfAllSentences(content)
+
+    state.save(content)
 
     async function fetchContentFromWikipedia(content){
         const algorithmiaAuthenticated = algorithmia(algorithmiaApiKey)
